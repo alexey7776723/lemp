@@ -1,0 +1,42 @@
+mysql -u aaa -p1 -e "create database recovered_aaa_db"
+sudo mkdir /var/www/recovered.aaa.lala/
+sudo mkdir /var/www/recovered.aaa.lala/logs/
+mysqldump -u aaa -p1 aaa_db |gzip > /var/lib/jenkins/backup/mysql/last.$(date +%y-%m-%d-%H-%M).aaa_db.gz
+
+# Revcovered DB MariaDB
+#ned to be DB recovered_aaa_db and dump DB
+mysql -u aaa -p1 -e "drop database recovered_aaa_db"
+mysql -u aaa -p1 -e "create database recovered_aaa_db"
+gunzip < /var/lib/jenkins/backup/mysql/last.* | mysql -u aaa -p1  recovered_aaa_db
+
+#php site 
+       # Created dir (need to be dir)
+        sudo rm -rf /var/www/recovered.aaa.lala/logs/
+        sudo rm -rf /var/www/recovered.aaa.lala/
+	sudo mkdir /var/www/recovered.aaa.lala/
+        sudo mkdir /var/www/recovered.aaa.lala/logs/
+sudo chown -R aaa:aaa /var/www/recovered.aaa.lala
+sudo chmod -R 777 /var/www/recovered.aaa.lala/
+
+sudo chown -R aaa:aaa /var/www/recovered.aaa.lala
+sudo chmod -R 777 /var/www/recovered.aaa.lala/
+
+
+#restored www
+sudo tar -C /var/www/recovered.aaa.lala/ -xvzf /var/lib/jenkins/backup/www/$(ls -all /var/lib/jenkins/backup/www/ | grep aaa.lala | awk '{print $9}' | grep last) --strip-components 3
+sudo rm -rf /var/www/recovered.aaa.lala/logs
+sudo sed -i 's/aaa\.lala/recovered\.aaa\.lala/g' /var/www/recovered.aaa.lala/*
+sudo mkdir /var/www/recovered.aaa.lala/logs
+
+#restored nginx config
+sudo tar -C /var/lib/jenkins/backup/conf/ -xvzf /var/lib/jenkins/backup/conf/$(ls -all /var/lib/jenkins/backup/conf/ | grep conf.avai | awk '{print $9}' | grep last) --strip-components 2
+sudo mv /var/lib/jenkins/backup/conf/sites-available/aaa.conf /etc/nginx/sites-available/recovered.aaa.lala.conf
+
+sudo ln -s /etc/nginx/sites-available/recovered.aaa.lala.conf /etc/nginx/sites-enabled/recovered.aaa.lala.conf
+sudo sed -i 's/aaa/recovered\.aaa/g' /etc/nginx/sites-available/recovered.aaa.lala.conf
+sudo sed -i 's/site5/site6/g' /etc/nginx/sites-available/recovered.aaa.lala.conf
+sudo sed -i "$(grep -n listen /etc/nginx/sites-available/recovered.aaa.lala.conf | awk -F: '{print $1}'),1d" /etc/nginx/sites-available/recovered.aaa.lala.conf
+sudo sed -i 's/fpm\.recovered/fpm/' /etc/nginx/sites-available/recovered.aaa.lala.conf
+
+sudo systemctl reload nginx
+sudo systemctl reload php-fpm
