@@ -17,8 +17,8 @@ sudo tar -cvzf /var/lib/jenkins/backup/www/last.$(date +%y-%m-%d-%H-%M).aaa.lala
 sudo mv /var/lib/jenkins/backup/conf/$(ls -all /var/lib/jenkins/backup/conf/ | grep conf.avai | awk '{print $9}' | grep last) /var/lib/jenkins/backup/conf/$(ls -all /var/lib/jenkins/backup/conf/ | grep conf.avai | awk '{print $9}' | grep last | awk -F. '{print $2}').conf.avai.tar.gz
 sudo tar -cvzf /var/lib/jenkins/backup/conf/last.$(date +%y-%m-%d-%H-%M).conf_avai.tar.gz /etc/nginx/sites-available/
 
-sudo mv /var/lib/jenkins/backup/conf/nginx/$(ls -all /var/lib/jenkins/backup/conf/nginx/ | grep conf_nginx | awk '{print $9}' | grep last) /var/lib/jenkins/backup/conf/nginx/$(ls -all /var/lib/jenkins/backup/conf/nginx/ | grep conf_nginx | awk '{print $9}' | grep last | awk -F. '{print $2}').conf_nginx.conf.tar.gz
-sudo tar -cvzf /var/lib/jenkins/backup/conf/nginx/last.$(date +%y-%m-%d-%H-%M).conf_nginx.conf.tar.gz /etc/nginx/nginx.conf
+sudo mv /var/lib/jenkins/backup/conf/$(ls -all /var/lib/jenkins/backup/conf/ | grep conf_nginx | awk '{print $9}' | grep last) /var/lib/jenkins/backup/conf/$(ls -all /var/lib/jenkins/backup/conf/ | grep conf_nginx | awk '{print $9}' | grep last | awk -F. '{print $2}').conf_nginx.conf.tar.gz
+sudo tar -cvzf /var/lib/jenkins/backup/conf/last.$(date +%y-%m-%d-%H-%M).conf_nginx.conf.tar.gz /etc/nginx/nginx.conf
 
-sudo mv /var/lib/jenkins/backup/conf/php/$(ls -all /var/lib/jenkins/backup/conf/php/ | grep conf_php | awk '{print $9}' | grep last)  /var/lib/jenkins/backup/conf/php/$(ls -all /var/lib/jenkins/backup/conf/php/ | grep conf_php | awk '{print $9}' | grep last | awk -F. '{print $2}').conf_php.conf.tar.gz
-sudo tar -cvzf /var/lib/jenkins/backup/conf/php/last.$(date +%y-%m-%d-%H-%M).conf_php.conf.tar.gz /etc/php-fpm.d/
+sudo mv /var/lib/jenkins/backup/conf/$(ls -all /var/lib/jenkins/backup/conf/ | grep conf_php | awk '{print $9}' | grep last)  /var/lib/jenkins/backup/conf/$(ls -all /var/lib/jenkins/backup/conf/ | grep conf_php | awk '{print $9}' | grep last | awk -F. '{print $2}').conf_php.conf.tar.gz
+sudo tar -cvzf /var/lib/jenkins/backup/conf/last.$(date +%y-%m-%d-%H-%M).conf_php.conf.tar.gz /etc/php-fpm.d/
