@@ -53,11 +53,6 @@ systemctl start mariadb
 systemctl enable mariadb
 
 
-#php site
-	mkdir /var/www/
-	mkdir /var/www/aaa.lala/
-        mkdir /var/www/aaa.lala/logs/
-
 ## change time zone 
 ln -sf /usr/share/zoneinfo/Europe/Minsk /etc/localtime
 
