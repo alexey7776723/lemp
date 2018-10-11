@@ -80,3 +80,9 @@ echo "mysql -u root -D aaa_db -e \"load data infile 'pid.txt' into table pid_tb 
 chmod 755 /var/www/aaa.lala/updt.sh
 chown aaa:aaa /var/www/aaa.lala/updt.sh
 chown aaa:aaa /var/www/aaa.lala/pid.txt
+
+echo "web good!"
+echo "web good!"
+echo "web good!"
+echo "web good!"
+echo "web good!"
