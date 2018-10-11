@@ -56,7 +56,10 @@ systemctl enable mariadb
 ## change time zone 
 ln -sf /usr/share/zoneinfo/Europe/Minsk /etc/localtime
 
-ls -all
+echo "lemp good!"
+echo "lemp good!"
+echo "lemp good!"
+echo "lemp good!"
 
 
 
