@@ -6,9 +6,9 @@ mysql -u $branches -p1 -D $branches -e "create table pid_tb (Date varchar(20), T
 
 # PID MYSQL, PHP, NGINX
 
-ps aux | grep sql |  awk '{print $1,$2,$9,$10}' | sed -n 's/mysql/mysql/p' | sed s/^/"`date +%H:%M:%S` "/ | sed s/^/"`date +%d.%m.%Y` "/ 	sudo tee /var/lib/mysql/$branches/pid.txt
-ps aux | grep php | grep process | awk '{print $11,$2,$9,$10}' | sed s/^/"`date +%H:%M:%S` "/ | sed s/^/"`date +%d.%m.%Y` "/ 			sudo tee -a /var/lib/mysql/$branches/pid.txt	
-ps aux | grep nginx | grep process | grep worker | awk '{print $11,$2,$9,$10}' | sed s/^/"`date +%H:%M:%S` "/ | sed s/^/"`date +%d.%m.%Y` "/   	sudo tee -a /var/lib/mysql/$branches/pid.txt
+ps aux | grep sql |  awk '{print $1,$2,$9,$10}' | sed -n 's/mysql/mysql/p' | sed s/^/"`date +%H:%M:%S` "/ | sed s/^/"`date +%d.%m.%Y` "/ |	sudo tee /var/lib/mysql/$branches/pid.txt
+ps aux | grep php | grep process | awk '{print $11,$2,$9,$10}' | sed s/^/"`date +%H:%M:%S` "/ | sed s/^/"`date +%d.%m.%Y` "/ 		|	sudo tee -a /var/lib/mysql/$branches/pid.txt	
+ps aux | grep nginx | grep process | grep worker | awk '{print $11,$2,$9,$10}' | sed s/^/"`date +%H:%M:%S` "/ | sed s/^/"`date +%d.%m.%Y` "/  | 	sudo tee -a /var/lib/mysql/$branches/pid.txt
 
 #Add data in DB
 
