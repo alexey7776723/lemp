@@ -1,0 +1,243 @@
+# NGINX
+echo [nginx] 									> /etc/yum.repos.d/nginx.repo
+echo name=nginx repo 								>> /etc/yum.repos.d/nginx.repo
+echo baseurl=http://nginx.org/packages/centos/7/\$basearch/ 			>> /etc/yum.repos.d/nginx.repo
+echo gpgcheck=0 								>> /etc/yum.repos.d/nginx.repo
+echo enabled=1 									>> /etc/yum.repos.d/nginx.repo
+yum update -y
+yum install nginx -y
+systemctl enable nginx
+systemctl start nginx
+
+
+
+
+# Add in nginx.conf
+#  sed -i $(grep -n 'http {' /etc/nginx/nginx.conf | awk -F: '{print $1}')'a\include /etc/nginx/sites-enabled/*.conf;' /etc/nginx/nginx.conf 
+
+mv /etc/nginx/nginx.conf /etc/nginx/nginx.con.old
+
+
+
+echo "user nginx;"												  > /etc/nginx/nginx.conf
+echo "worker_processes auto;" 											>> /etc/nginx/nginx.conf 
+echo "error_log /var/log/nginx/error.log;" 									>> /etc/nginx/nginx.conf 
+echo "pid /run/nginx.pid;" 											>> /etc/nginx/nginx.conf
+echo "include /usr/share/nginx/modules/*.conf;" 								>> /etc/nginx/nginx.conf
+echo "events {" 												>> /etc/nginx/nginx.conf
+echo    "worker_connections 1024;" 										>> /etc/nginx/nginx.conf
+echo "}"  													>> /etc/nginx/nginx.conf
+echo "http {" 													>> /etc/nginx/nginx.conf
+echo "include /etc/nginx/sites-enabled/*.conf;" 								>> /etc/nginx/nginx.conf
+echo    log_format  main  \'\$remote_addr - \$remote_user \[\$time_local\] \"\$request\" \'  			>> /etc/nginx/nginx.conf
+echo \'\$status \$body_bytes_sent \"\$http_referer\" \'  							>> /etc/nginx/nginx.conf
+echo \'\"\$http_user_agent\" \"\$http_x_forwarded_for\"\'\; 	 						>> /etc/nginx/nginx.conf
+echo    "access_log  /var/log/nginx/access.log  main;" 								>> /etc/nginx/nginx.conf
+echo    sendfile            on\; 										>> /etc/nginx/nginx.conf
+echo    tcp_nopush          on\; 										>> /etc/nginx/nginx.conf
+echo    tcp_nodelay         on\; 										>> /etc/nginx/nginx.conf
+echo    keepalive_timeout   65\; 										>> /etc/nginx/nginx.conf
+echo    types_hash_max_size 2048\; 										>> /etc/nginx/nginx.conf
+echo    include             /etc/nginx/mime.types\; 								>> /etc/nginx/nginx.conf
+echo    default_type        application/octet-stream\; 								>> /etc/nginx/nginx.conf
+echo    include /etc/nginx/conf.d/\*\.conf\; 									>> /etc/nginx/nginx.conf
+echo server \{ 													>> /etc/nginx/nginx.conf
+echo        server_name  \_\; 											>> /etc/nginx/nginx.conf
+echo        root         /usr/share/nginx/html\; 								>> /etc/nginx/nginx.conf
+echo        include /etc/nginx/default.d\/\*\.conf\; 								>> /etc/nginx/nginx.conf
+echo        location \/ \{ 											>> /etc/nginx/nginx.conf
+echo        \} 													>> /etc/nginx/nginx.conf
+echo        error_page 404 \/404.html\; 									>> /etc/nginx/nginx.conf
+echo            location \= \/40x\.html \{ 									>> /etc/nginx/nginx.conf
+echo        \} 													>> /etc/nginx/nginx.conf
+echo        error_page 500 502 503 504 \/50x\.html\; 								>> /etc/nginx/nginx.conf
+echo            location \= \/50x\.html \{ 									>> /etc/nginx/nginx.conf
+echo        \} 													>> /etc/nginx/nginx.conf
+echo    \}  													>> /etc/nginx/nginx.conf
+echo \} 													>> /etc/nginx/nginx.conf
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Config Nginx
+	mkdir /etc/nginx/sites-available
+	mkdir /etc/nginx/sites-enabled
+	mkdir /var/www/logs/
+
+
+echo error_log /var/www/$branches.lala/logs/nginx_$branches.lala_error.log\;    		 > /etc/nginx/sites-available/$branches.conf
+echo access_log  /var/www/$branches.lala/logs/nginx_$branches.lala_access.log\; 		>> /etc/nginx/sites-available/$branches.conf
+
+echo server \{                                                    		>> /etc/nginx/sites-available/$branches.conf
+echo listen       80 default_server\;                             		>> /etc/nginx/sites-available/$branches.conf
+echo server_name site5.com www.site5.com\;                            		>> /etc/nginx/sites-available/$branches.conf
+echo index index.html  index.php\;                   		  		>> /etc/nginx/sites-available/$branches.conf
+echo root /var/www/$branches.lala/\;					 		>> /etc/nginx/sites-available/$branches.conf							  		
+echo \#Pass PHP scripts to PHP-FPM						>> /etc/nginx/sites-available/$branches.conf
+echo location \~ \\.php\$ \{							>> /etc/nginx/sites-available/$branches.conf
+echo fastcgi_index   index.php\;						>> /etc/nginx/sites-available/$branches.conf
+echo error_log  /var/www/$branches.lala/logs/php_$branches_error.log\;			>> /etc/nginx/sites-available/$branches.conf
+echo \# fastcgi_pass    127.0.0.1:9000\;					>> /etc/nginx/sites-available/$branches.conf
+echo fastcgi_pass   unix:/var/run/php-fpm/php-fpm.$branches.sock\;			>> /etc/nginx/sites-available/$branches.conf
+echo include         fastcgi_params\;						>> /etc/nginx/sites-available/$branches.conf
+echo fastcgi_param   SCRIPT_FILENAME    \$document_root\$fastcgi_script_name\;	>> /etc/nginx/sites-available/$branches.conf
+echo fastcgi_param   SCRIPT_NAME        \$fastcgi_script_name\;			>> /etc/nginx/sites-available/$branches.conf
+
+echo \}										>> /etc/nginx/sites-available/$branches.conf
+echo \}										>> /etc/nginx/sites-available/$branches.conf
+
+
+
+
+# link Nginx config
+	ln -s /etc/nginx/sites-available/$branches.conf /etc/nginx/sites-enabled/$branches1.conf
+
+
+
+
+
+
+#PHP-FPM
+yum install epel-release -y
+yum update -y
+rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+yum install php71w-fpm php71 -y
+systemctl enable php-fpm
+systemctl start php-fpm
+
+
+# PHP-FPM config
+
+
+echo [$branches] 									>  /etc/php-fpm.d/$branches.lala.conf
+echo user = $branches 								>> /etc/php-fpm.d/$branches.lala.conf
+echo group = $branches 								>> /etc/php-fpm.d/$branches.lala.conf
+echo listen = /var/run/php-fpm/php-fpm.$branches.sock 				>> /etc/php-fpm.d/$branches.lala.conf
+echo listen.owner = nginx 							>> /etc/php-fpm.d/$branches.lala.conf
+echo listen.group = nginx 							>> /etc/php-fpm.d/$branches.lala.conf
+echo listen.allowed_clients = 127.0.0.1 					>> /etc/php-fpm.d/$branches.lala.conf
+echo pm = dynamic 								>> /etc/php-fpm.d/$branches.lala.conf
+echo pm.max_children = 50 							>> /etc/php-fpm.d/$branches.lala.conf
+echo pm.start_servers = 5 							>> /etc/php-fpm.d/$branches.lala.conf
+echo pm.min_spare_servers = 5 							>> /etc/php-fpm.d/$branches.lala.conf
+echo pm.max_spare_servers = 35 							>> /etc/php-fpm.d/$branches.lala.conf
+echo slowlog = /var/log/php-fpm/www-slow.log 					>> /etc/php-fpm.d/$branches.lala.conf
+echo php_admin_value[error_log] = /var/log/php-fpm/www-error.log 		>> /etc/php-fpm.d/$branches.lala.conf
+echo php_admin_flag[log_errors] = on 						>> /etc/php-fpm.d/$branches.lala.conf
+echo php_value[session.save_handler] = files 					>> /etc/php-fpm.d/$branches.lala.conf
+echo php_value[session.save_path]    = /var/lib/php/session 			>> /etc/php-fpm.d/$branches.lala.conf
+echo php_value[soap.wsdl_cache_dir]  = /var/lib/php/wsdlcache 			>> /etc/php-fpm.d/$branches.lala.conf
+
+
+
+
+
+
+#MARIA_DB
+echo [mariadb] 									> /etc/yum.repos.d/mariadb.repo
+echo name = MariaDB 								>> /etc/yum.repos.d/mariadb.repo
+echo baseurl = http://yum.mariadb.org/10.2/centos7-amd64 			>> /etc/yum.repos.d/mariadb.repo
+echo gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB 			>> /etc/yum.repos.d/mariadb.repo
+echo gpgcheck=1 								>> /etc/yum.repos.d/mariadb.repo
+ yum update -y
+yum remove epel-release -y
+  yum update -y
+
+yum install -y MariaDB-server MariaDB-client MariaDB-devel MariaDB-shared
+systemctl start mariadb
+systemctl enable mariadb
+
+
+#Create USER, DB, TABLE
+mysql -u root -e "CREATE USER $branches@localhost IDENTIFIED BY '1'"
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS $branches"
+mysql -u root -e "grant all privileges on $branches.* to $branches@localhost"
+mysql -u $branches -p1 -D $branches -e "create table pid_tb (Date varchar(20), Time varchar(20), Process varchar(40) NOT NULL, PID varchar(11) NOT NULL, date_strt varchar(20) NOT NULL, time_strt varchar(20) NOT NULL)"
+
+# PID MYSQL, PHP, NGINX
+
+ps aux | grep sql |  awk '{print $1,$2,$9,$10}' | sed -n 's/mysql/mysql/p' | sed s/^/"`date +%H:%M:%S` "/ | sed s/^/"`date +%d.%m.%Y` "/	 >/var/lib/mysql/$branches/pid.txt
+ps aux | grep php | grep process | awk '{print $11,$2,$9,$10}' | sed s/^/"`date +%H:%M:%S` "/ | sed s/^/"`date +%d.%m.%Y` "/ 			>>/var/lib/mysql/$branches/pid.txt	
+ps aux | grep nginx | grep process | grep worker | awk '{print $11,$2,$9,$10}' | sed s/^/"`date +%H:%M:%S` "/ | sed s/^/"`date +%d.%m.%Y` "/   	>>/var/lib/mysql/$branches/pid.txt
+
+#Add data in DB
+
+mysql -u root -D $branches -e "load data infile 'pid.txt' into table pid_tb FIELDS TERMINATED BY ' '" 
+
+#php site
+	mkdir /var/www/
+		mkdir /var/www/$branches.lala/
+        mkdir /var/www/$branches.lala/logs/
+
+## change time zone 
+ln -sf /usr/share/zoneinfo/Europe/Minsk /etc/localtime
+
+
+echo \<\?php  \$output \= shell_exec\(\'date\'\)\;								> /var/www/$branches.lala/index.php 
+echo echo\"\<pre\>\$output\<\/pre\>\"\;  						 			>> /var/www/$branches.lala/index.php 
+echo \$output3 \= shell_exec\(\'hostname\'\)\; echo \"Hostname\: \<pre\>\$output3\<\/pre\>\"\; 			>> /var/www/$branches.lala/index.php
+echo "shell_exec('/bin/bash  /var/www/$branches.lala/updt.sh'); 	"			>> /var/www/$branches.lala/index.php
+echo \$output5 \= shell_exec\(\'cat /var/www/$branches.lala/pid.txt\'\)\; echo \"\<pre\>\$output5\</pre\>\"\;  \?\> 		>> /var/www/$branches.lala/index.php
+
+										
+
+useradd -s /bin/false -M $branches
+chmod -R 755 /var/www/
+chown -R $branches:$branches /var/www/$branches.lala
+
+# Selinux
+sed -i "s/SELINUX=enforcing/SELINUX=disabled/" /etc/selinux/config
+setenforce 0
+
+
+systemctl reload nginx
+systemctl reload php-fpm
+
+
+mkdir /root/backup
+mysqldump -u root $branches |gzip > /root/backup/$(date +%y-%m-%d-%H-%M).$branches.lala.gz;
+
+echo "mysqldump -u root $branches |gzip > /root/backup/$(date +%y-%m-%d-%H-%M).$branches.lala.gz;" 	 > /root/backup/backup
+echo "find /root/backup/*.gz -mtime +7 -exec rm -rf {} \;" 				>> /root/backup/backup
+chmod 755 /root/backup/backup
+
+
+
+echo "0 8 * * * /root/backup/backup" 							 > /var/spool/cron/root
+echo "0 20 * * * /root/backup/backup"							>> /var/spool/cron/root
+chmod 600 /var/spool/cron/root
+
+
+
+
+
+#Add and Update sql DB after reload page
+
+# PID MYSQL, PHP, NGINX
+echo \#\!/bin/bash > /var/www/$branches.lala/updt.sh
+echo "ps aux | grep sql |  awk '{print \$1,\$2,\$9,\$10}' | sed -n 's/mysql/mysql/p' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ >/var/lib/mysql/$branches/pid.txt" >> /var/www/$branches.lala/updt.sh
+echo "ps aux | grep php | grep process | awk '{print \$11,\$2,\$9,\$10}' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ >>/var/lib/mysql/$branches/pid.txt" >> /var/www/$branches.lala/updt.sh	
+echo "ps aux | grep nginx | grep process | grep worker | awk '{print \$11,\$2,\$9,\$10}' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ >>/var/lib/mysql/$branches/pid.txt " >> /var/www/$branches.lala/updt.sh
+
+echo "ps aux | grep sql |  awk '{print \$1,\$2,\$9,\$10}' | sed -n 's/mysql/mysql/p' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ > /var/www/$branches.lala/pid.txt" >> /var/www/$branches.lala/updt.sh
+echo "ps aux | grep php | grep process | awk '{print \$11,\$2,\$9,\$10}' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ >> /var/www/$branches.lala/pid.txt" >> /var/www/$branches.lala/updt.sh	
+echo "ps aux | grep nginx | grep process | grep worker | awk '{print \$11,\$2,\$9,\$10}' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ >> /var/www/$branches.lala/pid.txt " >> /var/www/$branches.lala/updt.sh
+
+#Add data in DB
+
+echo "mysql -u root -D $branches -e \"load data infile 'pid.txt' into table pid_tb FIELDS TERMINATED BY ' '\" " >> /var/www/$branches.lala/updt.sh
+
+chmod 755 /var/www/$branches.lala/updt.sh
+chown $branches:$branches /var/www/$branches.lala/updt.sh
+chown $branches:$branches /var/www/$branches.lala/pid.txt

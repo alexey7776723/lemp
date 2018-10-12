@@ -1,0 +1,71 @@
+# NGINX
+echo [nginx] 									> /etc/yum.repos.d/nginx.repo
+echo name=nginx repo 								>> /etc/yum.repos.d/nginx.repo
+echo baseurl=http://nginx.org/packages/centos/7/\$basearch/ 			>> /etc/yum.repos.d/nginx.repo
+echo gpgcheck=0 								>> /etc/yum.repos.d/nginx.repo
+echo enabled=1 									>> /etc/yum.repos.d/nginx.repo
+yum update -y
+yum install nginx -y
+systemctl enable nginx
+systemctl start nginx
+
+
+
+
+
+
+
+
+
+
+# Config Nginx
+	mkdir /etc/nginx/sites-available
+	mkdir /etc/nginx/sites-enabled
+	mkdir /var/www/logs/
+
+
+
+
+
+#PHP-FPM
+yum install epel-release -y
+yum update -y
+rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+yum install php71w-fpm php71 -y
+systemctl enable php-fpm
+systemctl start php-fpm
+
+
+
+
+#MARIA_DB
+echo [mariadb] 									> /etc/yum.repos.d/mariadb.repo
+echo name = MariaDB 								>> /etc/yum.repos.d/mariadb.repo
+echo baseurl = http://yum.mariadb.org/10.2/centos7-amd64 			>> /etc/yum.repos.d/mariadb.repo
+echo gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB 			>> /etc/yum.repos.d/mariadb.repo
+echo gpgcheck=1 								>> /etc/yum.repos.d/mariadb.repo
+ yum update -y
+yum remove epel-release -y
+  yum update -y
+
+yum install -y MariaDB-server MariaDB-client MariaDB-devel MariaDB-shared
+systemctl start mariadb
+systemctl enable mariadb
+
+
+## change time zone 
+ln -sf /usr/share/zoneinfo/Europe/Minsk /etc/localtime
+
+echo "lemp good!"
+echo "lemp good!"
+echo "lemp good!"
+echo "lemp good!"
+
+
+
+
+
+
+
+
+

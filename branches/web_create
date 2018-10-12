@@ -1,0 +1,88 @@
+#Create USER, DB, TABLE
+mysql -u root -e "CREATE USER $branches@localhost IDENTIFIED BY '1'"
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS $branches"
+mysql -u root -e "grant all privileges on $branches.* to $branches@localhost"
+mysql -u $branches -p1 -D $branches -e "create table pid_tb (Date varchar(20), Time varchar(20), Process varchar(40) NOT NULL, PID varchar(11) NOT NULL, date_strt varchar(20) NOT NULL, time_strt varchar(20) NOT NULL)"
+
+# PID MYSQL, PHP, NGINX
+
+ps aux | grep sql |  awk '{print $1,$2,$9,$10}' | sed -n 's/mysql/mysql/p' | sed s/^/"`date +%H:%M:%S` "/ | sed s/^/"`date +%d.%m.%Y` "/	 >/var/lib/mysql/$branches/pid.txt
+ps aux | grep php | grep process | awk '{print $11,$2,$9,$10}' | sed s/^/"`date +%H:%M:%S` "/ | sed s/^/"`date +%d.%m.%Y` "/ 			>>/var/lib/mysql/$branches/pid.txt	
+ps aux | grep nginx | grep process | grep worker | awk '{print $11,$2,$9,$10}' | sed s/^/"`date +%H:%M:%S` "/ | sed s/^/"`date +%d.%m.%Y` "/   	>>/var/lib/mysql/$branches/pid.txt
+
+#Add data in DB
+
+mysql -u root -D $branches -e "load data infile 'pid.txt' into table pid_tb FIELDS TERMINATED BY ' '" 
+
+#php site
+	mkdir /var/www/
+		mkdir /var/www/$branches.lala/
+        mkdir /var/www/$branches.lala/logs/
+
+## change time zone 
+ln -sf /usr/share/zoneinfo/Europe/Minsk /etc/localtime
+
+
+echo \<\?php  \$output \= shell_exec\(\'date\'\)\;								> /var/www/$branches.lala/index.php 
+echo echo\"\<pre\>\$output\<\/pre\>\"\;  						 			>> /var/www/$branches.lala/index.php 
+echo \$output3 \= shell_exec\(\'hostname\'\)\; echo \"Hostname\: \<pre\>\$output3\<\/pre\>\"\; 			>> /var/www/$branches.lala/index.php
+echo "shell_exec('/bin/bash  /var/www/$branches.lala/updt.sh'); 	"			>> /var/www/$branches.lala/index.php
+echo \$output5 \= shell_exec\(\'cat /var/www/$branches.lala/pid.txt\'\)\; echo \"\<pre\>\$output5\</pre\>\"\;  \?\> 		>> /var/www/$branches.lala/index.php
+
+										
+
+useradd -s /bin/false -M $branches
+chmod -R 755 /var/www/
+chown -R $branches:$branches /var/www/$branches.lala
+
+# Selinux
+sed -i "s/SELINUX=enforcing/SELINUX=disabled/" /etc/selinux/config
+setenforce 0
+
+
+systemctl reload nginx
+systemctl reload php-fpm
+
+
+mkdir /root/backup
+mysqldump -u root $branches |gzip > /root/backup/$(date +%y-%m-%d-%H-%M).$branches.lala.gz;
+
+echo "mysqldump -u root $branches |gzip > /root/backup/$(date +%y-%m-%d-%H-%M).$branches.lala.gz;" 	 > /root/backup/backup
+echo "find /root/backup/*.gz -mtime +7 -exec rm -rf {} \;" 				>> /root/backup/backup
+chmod 755 /root/backup/backup
+
+
+
+echo "0 8 * * * /root/backup/backup" 							 > /var/spool/cron/root
+echo "0 20 * * * /root/backup/backup"							>> /var/spool/cron/root
+chmod 600 /var/spool/cron/root
+
+
+
+
+
+#Add and Update sql DB after reload page
+
+# PID MYSQL, PHP, NGINX
+echo \#\!/bin/bash > /var/www/$branches.lala/updt.sh
+echo "ps aux | grep sql |  awk '{print \$1,\$2,\$9,\$10}' | sed -n 's/mysql/mysql/p' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ >/var/lib/mysql/$branches/pid.txt" >> /var/www/$branches.lala/updt.sh
+echo "ps aux | grep php | grep process | awk '{print \$11,\$2,\$9,\$10}' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ >>/var/lib/mysql/$branches/pid.txt" >> /var/www/$branches.lala/updt.sh	
+echo "ps aux | grep nginx | grep process | grep worker | awk '{print \$11,\$2,\$9,\$10}' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ >>/var/lib/mysql/$branches/pid.txt " >> /var/www/$branches.lala/updt.sh
+
+echo "ps aux | grep sql |  awk '{print \$1,\$2,\$9,\$10}' | sed -n 's/mysql/mysql/p' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ > /var/www/$branches.lala/pid.txt" >> /var/www/$branches.lala/updt.sh
+echo "ps aux | grep php | grep process | awk '{print \$11,\$2,\$9,\$10}' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ >> /var/www/$branches.lala/pid.txt" >> /var/www/$branches.lala/updt.sh	
+echo "ps aux | grep nginx | grep process | grep worker | awk '{print \$11,\$2,\$9,\$10}' | sed s/^/\"\`date +%H:%M:%S\` \"/ | sed s/^/\"\`date +%d.%m.%Y\` \"/ >> /var/www/$branches.lala/pid.txt " >> /var/www/$branches.lala/updt.sh
+
+#Add data in DB
+
+echo "mysql -u root -D $branches -e \"load data infile 'pid.txt' into table pid_tb FIELDS TERMINATED BY ' '\" " >> /var/www/$branches.lala/updt.sh
+
+chmod 755 /var/www/$branches.lala/updt.sh
+chown $branches:$branches /var/www/$branches.lala/updt.sh
+chown $branches:$branches /var/www/$branches.lala/pid.txt
+
+echo "web good!"
+echo "web good!"
+echo "web good!"
+echo "web good!"
+echo "web good!"

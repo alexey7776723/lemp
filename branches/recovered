@@ -1,0 +1,42 @@
+mysql -u $branches -p1 -e "create database recovered_$branches"
+sudo mkdir /var/www/recovered.$branches.lala/
+sudo mkdir /var/www/recovered.$branches.lala/logs/
+mysqldump -u $branches -p1 $branches |gzip > /var/lib/jenkins/backup/mysql/last.$(date +%y-%m-%d-%H-%M).$branches.gz
+
+# Revcovered DB MariaDB
+#ned to be DB recovered_$branches and dump DB
+mysql -u $branches -p1 -e "drop database recovered_$branches"
+mysql -u $branches -p1 -e "create database recovered_$branches"
+gunzip < /var/lib/jenkins/backup/mysql/last.* | mysql -u $branches -p1  recovered_$branches
+
+#php site 
+       # Created dir (need to be dir)
+        sudo rm -rf /var/www/recovered.$branches.lala/logs/
+        sudo rm -rf /var/www/recovered.$branches.lala/
+	sudo mkdir /var/www/recovered.$branches.lala/
+        sudo mkdir /var/www/recovered.$branches.lala/logs/
+sudo chown -R $branches:$branches /var/www/recovered.$branches.lala
+sudo chmod -R 777 /var/www/recovered.$branches.lala/
+
+sudo chown -R $branches:$branches /var/www/recovered.$branches.lala
+sudo chmod -R 777 /var/www/recovered.$branches.lala/
+
+
+#restored www
+sudo tar -C /var/www/recovered.$branches.lala/ -xvzf /var/lib/jenkins/backup/www/$(ls -all /var/lib/jenkins/backup/www/ | grep $branches.lala | awk '{print $9}' | grep last) --strip-components 3
+sudo rm -rf /var/www/recovered.$branches.lala/logs
+sudo sed -i 's/$branches\.lala/recovered\.$branches\.lala/g' /var/www/recovered.$branches.lala/*
+sudo mkdir /var/www/recovered.$branches.lala/logs
+
+#restored nginx config
+sudo tar -C /var/lib/jenkins/backup/conf/ -xvzf /var/lib/jenkins/backup/conf/$(ls -all /var/lib/jenkins/backup/conf/ | grep conf.avai | awk '{print $9}' | grep last) --strip-components 2
+sudo mv /var/lib/jenkins/backup/conf/sites-available/$branches.conf /etc/nginx/sites-available/recovered.$branches.lala.conf
+
+sudo ln -s /etc/nginx/sites-available/recovered.$branches.lala.conf /etc/nginx/sites-enabled/recovered.$branches.lala.conf
+sudo sed -i 's/$branches/recovered\.$branches/g' /etc/nginx/sites-available/recovered.$branches.lala.conf
+sudo sed -i 's/site5/site6/g' /etc/nginx/sites-available/recovered.$branches.lala.conf
+sudo sed -i "$(grep -n listen /etc/nginx/sites-available/recovered.$branches.lala.conf | awk -F: '{print $1}'),1d" /etc/nginx/sites-available/recovered.$branches.lala.conf
+sudo sed -i 's/fpm\.recovered/fpm/' /etc/nginx/sites-available/recovered.$branches.lala.conf
+
+sudo systemctl reload nginx
+sudo systemctl reload php-fpm
