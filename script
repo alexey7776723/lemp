@@ -73,6 +73,7 @@ echo \} 													>> /etc/nginx/nginx.conf
 # Config Nginx
 	mkdir /etc/nginx/sites-available
 	mkdir /etc/nginx/sites-enabled
+	mkdir /etc/www/
 	mkdir /var/www/logs/
 
 
