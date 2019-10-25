@@ -15,9 +15,9 @@ ps aux | grep nginx | grep process | grep worker | awk '{print $11,$2,$9,$10}' |
 mysql -u root -D aaa_db -e "load data infile 'pid.txt' into table pid_tb FIELDS TERMINATED BY ' '" 
 
 #php site
-	mkdir /var/www/
-		mkdir /var/www/aaa.lala/
-        mkdir /var/www/aaa.lala/logs/
+mkdir /var/www/
+mkdir /var/www/aaa.lala/
+mkdir /var/www/aaa.lala/logs/
 
 ## change time zone 
 ln -sf /usr/share/zoneinfo/Europe/Minsk /etc/localtime
